@@ -6,40 +6,31 @@ Created on Tue Jul 25 20:59:32 2017
 """
 
 import pandas as pd
-import matplotlib.pyplot as plt
 
 from sklearn.cross_validation import train_test_split
 from sklearn.ensemble import  RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import LabelEncoder
-from sklearn import metrics
 
 
-#Todas as classes contidas nesse conjunto contem mais que 100 ocorrencias
-#Testando a hipotese das probabilidades
+
+
+#Você pode achar a descrição do conjuto de dados na seção Datasets.
+#No arquivo README.md esta contido um relatorio das variaveis envolvidas no problema
 dados = pd.read_csv("arquivos_usu_1_com_acess_id.csv")
+
+
 lb = LabelEncoder()
 dados.ddat_dia_semana = lb.fit_transform(dados.ddat_dia_semana)
 
-#analise = dados[["ddat_dia","darq_id"]]
-
 
 #Para aprendizado supervisionado
+#x_data se refere as features e y_data se refere ao target
 x_data = dados.drop("acess_id",axis=1)
-
-#Para aprendizado não supervisionado
-#x_data = dados
 y_data = dados['acess_id']
-#
+
 x_train,x_test,y_train,y_test = train_test_split(x_data,y_data,test_size=1)
-#
-#
-#mlp = MLPClassifier(hidden_layer_sizes=8,verbose=True,activation="logistic")
-#mlp.fit(x_data,y_data)
-#
-#
-#
-##
+
 #forest = RandomForestClassifier(n_estimators=161, max_depth=42,
 #                                 criterion='entropy',
 #                                 min_samples_split=2,
