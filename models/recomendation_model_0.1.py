@@ -31,30 +31,31 @@ y_data = dados['acess_id']
 
 x_train,x_test,y_train,y_test = train_test_split(x_data,y_data,test_size=1)
 
-#forest = RandomForestClassifier(n_estimators=161, max_depth=42,
-#                                 criterion='entropy',
-#                                 min_samples_split=2,
-#                                 min_samples_leaf=1)
-#forest.fit(x_train,y_train)
-#####
-#prob_distribuition = forest.predict_proba(x_data)
-#x_train,x_test,y_train,y_test = train_test_split(prob_distribuition,y_data,
-#                                              test_size=0.15)
-##
-##
-#out_mlp = MLPClassifier(activation="logistic",verbose=True,
-#                          hidden_layer_sizes=(len(dados.acess_id.value_counts()) +1,),
-#                          max_iter=5000)
-##
-#out_mlp.fit(x_train,y_train)
-#
-#
-#predictions = out_mlp.predict(x_test)
+#O random forest é o modelo de entrada.
+#Ele é usado apenas para associar probabilidades dado uma classe a cada instância.
+forest = RandomForestClassifier(n_estimators=161, max_depth=42,
+                                 criterion='entropy',
+                                 min_samples_split=2,
+                                 min_samples_leaf=1)
+forest.fit(x_train,y_train)
+
+#Aqui são criadas novas features onde as linhas são as instâncias e
+#as colunas são as probabilidades delas pertecerem a uma determinada classe.
+prob_distribuition = forest.predict_proba(x_data)
+
+x_train,x_test,y_train,y_test = train_test_split(prob_distribuition,y_data,
+                                              test_size=0.15)
+#O Multilayer perceptron usa essas distribuições de probabilidades para
+#treino. similar a softmax regression.
+out_mlp = MLPClassifier(activation="logistic",verbose=True,
+                          hidden_layer_sizes=(len(dados.acess_id.value_counts()) +1,),
+                          max_iter=5000)
+
+out_mlp.fit(x_train,y_train)
 
 
-
-
-
+#Essa função retorna uma 2d array onde cada linha
+#contem 5 recomendações de arquivos para o usuário naquele dia.
 def recomendations():
     classes = out_mlp.classes_
 
@@ -83,78 +84,11 @@ def recomendations():
     return recomendations,("certo:{}".format(certo),"errado{}:".format(errado))
     
 
-#
+#Variavel para teste
 #recomendation,taxas = recomendations()
 
-prop = {}
-
-for x in recomendation:
-    for y in x:
-        if y not in prop.keys():
-            prop[y] = 1
-        else:
-            prop[y] += 1
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-#Funções temporárias
-#--------------------------------------------------------------
-
-
-info = {
-'tipo':'forest',
-'loops':(1,100),
-'x_train':x_train,
-'x_test':x_test,
-'y_train':y_train,
-'y_test':y_test,
-}
-
-
-
-def make_acuracy_plot(info,verbose=False):
-    acur = []
-    cohen = []
-    
-    if info['tipo'] == "tree":
-        for x in range(info['loops'][0],info['loops'][1]):
-            Model = DecisionTreeClassifier(n_estimators=161, max_depth=82,criterion='giny',
-                                           min_sample_split=2,
-                                           min_sample_life=(x/200.)
-                                           )
-            Model.fit(info['x_train'],info['y_train'])
-            predictions = Model.predict(info['x_test'])
-            acur.append(metrics.accuracy_score(info['y_test'],predictions))
-   
-    if info['tipo'] == "forest":
-        for x in range(info['loops'][0],info['loops'][1]):
-            Model = RandomForestClassifier(n_estimators=10,min_samples_split=(x/200.))
-                                           
-            Model.fit(info['x_train'],info['y_train'])
-            predictions = Model.predict(info['x_test'])
-            acur.append(metrics.accuracy_score(info['y_test'],predictions))
-            cohen.append(metrics.cohen_kappa_score(info['y_test'],predictions))
-            if verbose==True:
-               print("{} iteração".format(x))
-    
-    fig = plt.figure(224)
-    fig.add_subplot(221)
-    plt.plot(range(info['loops'][0],info['loops'][1]),acur)
-    plt.title("acuracy_score")
-    fig.add_subplot(222)
-    plt.plot(range(info['loops'][0],info['loops'][1]),cohen)
-    plt.title("Cohen_kappa_score")
 
 
 
